@@ -1,12 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { mnemonicToSeed } from "bip39";
 import { derivePath } from "ed25519-hd-key";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import nacl from "tweetnacl";
+import { fetchSolanaBalance } from "../hooks/fetchSolanaBalance";
 
 export function SolanaWallet({ mnemonic }: { mnemonic: string }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [publicKeys, setPublicKeys] = useState<PublicKey[]>([]);
+  const [balances, setBalances] = useState<{ [key: string]: number }>({});
+
+  useEffect(() => {
+    publicKeys.forEach((p) => {
+      const key = p.toBase58();
+      if (balances[key] === undefined) {
+        fetchSolanaBalance(p).then((balance: number) => {
+          setBalances((prev) => ({ ...prev, [key]: balance }));
+        });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [publicKeys]);
 
   return (
     <div>
@@ -24,7 +38,12 @@ export function SolanaWallet({ mnemonic }: { mnemonic: string }) {
         Add wallet
       </button>
       {publicKeys.map((p) => (
-        <div>{p.toBase58()}</div>
+        <div key={p.toBase58()}>
+          {p.toBase58()} -{" "}
+          {balances[p.toBase58()] !== undefined
+            ? balances[p.toBase58()]
+            : "Loading..."}
+        </div>
       ))}
     </div>
   );
