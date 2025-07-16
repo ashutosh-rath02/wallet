@@ -20,13 +20,13 @@ function CollapsibleSection({
   return (
     <div className="collapsible-section">
       <div className="collapsible-header" onClick={() => setOpen((v) => !v)}>
-        <span className="collapsible-arrow">
-          {open ? <ChevronDown size={22} /> : <ChevronRight size={22} />}
-        </span>
+        {open ? <ChevronDown size={22} /> : <ChevronRight size={22} />}
         {icon && <span className="collapsible-icon">{icon}</span>}
         <span className="collapsible-title">{title}</span>
       </div>
-      {open && <div className="collapsible-content">{children}</div>}
+      <div className={`collapsible-content${open ? " open" : ""}`}>
+        {open && children}
+      </div>
     </div>
   );
 }
